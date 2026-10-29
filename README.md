@@ -7,6 +7,11 @@ heat shields keep the plate below 150 °C ([issue #1](https://github.com/andrewg
   with geometry drawings, results and a sensitivity study
 - [`radiation.py`](radiation.py): view factors, the radiation and conduction network, and
   natural-convection correlations
+- [`astral_temps.csv`](astral_temps.csv): measured temperatures (°C) against position x (mm),
+  one column per case. The column headers (545, 500 and 300 °C) are external pyrometer
+  readings of the tube, which carry an emissivity calibration error, so they sit below the
+  measured values. Every column is readings on the tube itself, symmetric about the tube
+  centre at x = 200 mm. Blank cells are positions with no reading.
 - [`tests/`](tests/): checks against textbook view factors and the 1/(N + 1) shield result
 
 ## Results (base case)
