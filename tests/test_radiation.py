@@ -124,3 +124,13 @@ def test_box_sweep_rows():
     by_key = {(r["T_box"], r["n_shields"], r["eps_shield"]): r for r in rows if r["n_shields"]}
     assert by_key[(450.0, 1, 0.2)]["T_plate_max"] > by_key[(400.0, 1, 0.2)]["T_plate_max"]
     assert by_key[(400.0, 1, 0.45)]["T_shield_max"] > by_key[(400.0, 1, 0.2)]["T_shield_max"]
+
+
+def test_many_shields_leave_the_plate_above_a_hot_box():
+    # Air conduction across the gap sets a floor that extra shields can't remove.
+    T_box = 150 + 273.15
+    s = rad.Setup(T_amb=T_box, T_air=T_box, shield_thickness=0.1e-3)
+    p0, p4, p10 = (rad.solve(s, n, n_strips=20).T_plate_max for n in (0, 4, 10))
+    assert p10 < p4
+    assert p4 - p10 < 0.1 * (p0 - p4)
+    assert p10 > T_box
