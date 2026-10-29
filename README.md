@@ -9,6 +9,8 @@ and how many keep the outermost shield below 150 °C when there's no plate
   with geometry drawings, results and a sensitivity study
 - [`radiation.py`](radiation.py): view factors, the radiation and conduction network, and
   natural-convection correlations
+- [`radiation3d.py`](radiation3d.py): the 3D version, for a tube whose temperature varies
+  along its length; sheets are split into x–z patches
 - [`astral_temps.csv`](astral_temps.csv): measured temperatures (°C) against position x (mm),
   one column per case. The column headers (545, 500 and 300 °C) are external pyrometer
   readings of the tube, which carry an emissivity calibration error, so they sit below the
@@ -37,6 +39,22 @@ rising off the tube ignored.
 
 **One shield** is enough in the base case, but only just: a black tube, ε = 0.3 shields, or
 0.1 mm shields each push a lone shield over 150 °C. Two shields give a safe margin.
+
+## 3D, measured tube temperatures
+
+Uses the profiles in `astral_temps.csv`, with the plate centred on the tube (peak, °C):
+
+| Case | Plate, no shields | Plate, 1 shield | No plate, 1 shield | No plate, 2 shields |
+|---|---|---|---|---|
+| "545" | 130 | 45 | 98 | 61 |
+| "500" | 119 | 43 | 91 | 57 |
+| "300" | 64 | 33 | 51 | 39 |
+
+The measured tube is only near its peak over the middle ~50 mm, so **no shields are needed
+for the plate, and with no plate one shield is enough**. The plate's margin is thin in the
+"545" case: a black tube or 50 °C surroundings bring it to just under 150 °C, and a black
+stainless plate needs one shield. With no plate, an oxidised (ε = 0.45) 0.1 mm shield needs
+a second one.
 
 ## Running
 
