@@ -3,3 +3,5 @@ matplotlib
 pytest
 nbconvert
 ipykernel
+scipy
+scikit-fem

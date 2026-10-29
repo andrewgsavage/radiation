@@ -38,6 +38,25 @@ rising off the tube ignored.
 **One shield** is enough in the base case, but only just: a black tube, ε = 0.3 shields, or
 0.1 mm shields each push a lone shield over 150 °C. Two shields give a safe margin.
 
+## 3D FEA with the measured tube temperatures
+
+[`fea3d.py`](fea3d.py) is a scikit-fem finite-element model: solid hex meshes for the plate
+and shields, and radiation from the tube split into 40 segments at the
+[`astral_temps.csv`](astral_temps.csv) temperatures. Results and 3D contour plots are in
+[`fea3d_astral.ipynb`](fea3d_astral.ipynb), and `python run_fea_cases.py` regenerates
+`fea_results.json`. It matches the x-z patch model ([`radiation3d.py`](radiation3d.py)) to
+within about 2 °C, and the mesh is converged to 0.2 °C.
+
+| Case | Plate, no shield | Plate, 1 shield | No plate, 1 shield | No plate, 2 shields |
+|---|---|---|---|---|
+| 545 °C | 130 °C | 46 °C | 99 °C | 62 °C |
+| 500 °C | 120 °C | 43 °C | 92 °C | 59 °C |
+| 300 °C | 64 °C | 33 °C | 51 °C | 40 °C |
+
+Peaks of the outermost sheet. With the measured tube temperatures, **the plate stays below
+150 °C with no shields**, and with no plate **one shield** is enough. The tube is only near its
+peak temperature close to x = 200 mm, so these runs are much cooler than the uniform 650 °C case.
+
 ## Running
 
 ```bash
