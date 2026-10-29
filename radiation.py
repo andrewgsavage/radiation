@@ -261,13 +261,14 @@ class Setup:
 class Result:
     n_shields: int
     z_edges: np.ndarray  # strip edges, m
-    T_sheets: np.ndarray  # (n_shields + 1, n_strips) K, shields then plate
+    T_sheets: np.ndarray  # (n_sheets, n_strips) K, from the tube outward; the plate is last if present
     Q_radiation: float  # W, tube's net radiation
 
     @property
     def z(self):
         return 0.5 * (self.z_edges[1:] + self.z_edges[:-1])
 
+    # "plate" below means the outermost sheet: the plate, or the last shield if there is no plate.
     @property
     def T_plate_max(self):
         return self.T_sheets[-1].max()
@@ -283,11 +284,17 @@ def strip_edges(height, n_strips):
     return height / 2 * np.sign(u) * np.abs(u) ** 1.5
 
 
-def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
-    """n_strips = 1 gives the lumped model (each sheet at one temperature)."""
+def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = True) -> Result:
+    """n_strips = 1 gives the lumped model (each sheet at one temperature).
+
+    plate=False removes the plate: the outermost shield takes its place, a gap away
+    from the tube, and the other shields are evenly spaced inside it.
+    """
+    if not plate and n_shields < 1:
+        raise ValueError("need at least one shield when there is no plate")
     s = setup
     r = s.tube_od / 2
-    spacing = s.gap / (n_shields + 1)
+    spacing = s.gap / (n_shields + 1 if plate else n_shields)
     A_tube = np.pi * s.tube_od * s.length
 
     edges = strip_edges(s.plate_height, n_strips)
@@ -297,7 +304,7 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
     F_src = np.array([tube_to_rectangle(r, s.length, r + spacing, lo, hi)
                       for lo, hi in zip(edges[:-1], edges[1:])])
     F_gap = parallel_strips(s.length, edges, edges, spacing)
-    sheet_eps = [(s.eps_shield, s.eps_shield)] * n_shields + [(s.eps_plate, s.eps_plate)]
+    sheet_eps = [(s.eps_shield, s.eps_shield)] * n_shields + [(s.eps_plate, s.eps_plate)] * plate
 
     dz = np.diff(z)
     g_shield = s.k_shield * s.shield_thickness * s.length / dz
@@ -308,17 +315,17 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
 
     T, Q = solve_stack(
         s.T_tube, A_tube, s.eps_tube, F_src, A_strip, sheet_eps, F_gap, s.T_amb,
-        G_lateral=[g_shield] * n_shields + [g_plate],
+        G_lateral=[g_shield] * n_shields + [g_plate] * plate,
         G_gap=G_gap,
         h_exposed=lambda T: h_vertical_plate(T, s.T_amb, s.plate_height),
     )
     return Result(n_shields, edges, T, Q)
 
 
-def shields_required(setup: Setup, T_limit=150 + 273.15, n_max=10, use_peak=True, **kw):
-    """Smallest number of shields that keeps the plate below T_limit, or None."""
-    for n in range(n_max + 1):
-        res = solve(setup, n, **kw)
+def shields_required(setup: Setup, T_limit=150 + 273.15, n_max=10, use_peak=True, plate=True, **kw):
+    """Smallest number of shields that keeps the outermost sheet below T_limit, or None."""
+    for n in range(0 if plate else 1, n_max + 1):
+        res = solve(setup, n, plate=plate, **kw)
         if (res.T_plate_max if use_peak else res.T_plate_mean) < T_limit:
             return n
     return None

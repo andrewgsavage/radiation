@@ -1,7 +1,9 @@
 # radiation
 
 Radiation heat transfer from a 650 °C tube to a nearby vertical plate, and how many
-heat shields keep the plate below 150 °C ([issue #1](https://github.com/andrewgsavage/radiation/issues/1)).
+heat shields keep the plate below 150 °C ([issue #1](https://github.com/andrewgsavage/radiation/issues/1)),
+and how many keep the outermost shield below 150 °C when there's no plate
+([issue #3](https://github.com/andrewgsavage/radiation/issues/3)).
 
 - [`issue1_plate_temperature.ipynb`](issue1_plate_temperature.ipynb): the worked problem,
   with geometry drawings, results and a sensitivity study
@@ -25,6 +27,16 @@ heat shields keep the plate below 150 °C ([issue #1](https://github.com/andrewg
 plate-temperature estimate (about 122 °C) hides it. Assumptions are listed in the notebook:
 tube and plate ε = 0.8, carbon-steel plate, 25 °C still air, and heat carried by hot air
 rising off the tube ignored.
+
+## No plate (issue #3)
+
+| Shields | Outer shield peak |
+|---|---|
+| 1 | 131 °C |
+| 2 | 83 °C |
+
+**One shield** is enough in the base case, but only just: a black tube, ε = 0.3 shields, or
+0.1 mm shields each push a lone shield over 150 °C. Two shields give a safe margin.
 
 ## Running
 
