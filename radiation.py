@@ -13,8 +13,14 @@ uniform along x and through each sheet's thickness. Surfaces are gray and
 diffuse; everything not seen by a surface is a black environment at T_amb.
 
 Heat carried by the tube's rising hot air onto the sheets is ignored. Sheets lose
-heat to room air by natural convection on their exposed faces, conduct heat along
-their height, and exchange heat through the still air in the gaps between them.
+heat to the surrounding air (at T_air, by default T_amb) by natural convection on
+their exposed faces, conduct heat along their height, and exchange heat through the
+still air in the gaps between them.
+
+Inside a closed box of still air (issue #4), T_amb is the box's wall temperature and
+T_air its air temperature. The walls are taken as black: a box much larger than the
+sheets acts as a cavity, so its effective emissivity seen from the sheets is close
+to 1 whatever the wall finish.
 All units SI, temperatures in kelvin.
 """
 
@@ -138,7 +144,8 @@ def tube_to_rectangle(radius, length, distance, z_lo, z_hi, n_phi=360, n_x=80):
 # --- radiation/conduction network for a source facing a stack of parallel sheets
 
 def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
-                G_lateral=None, G_gap=None, h_exposed=None, T_last=None, tol=1e-8):
+                G_lateral=None, G_gap=None, h_exposed=None, T_last=None, T_air=None,
+                tol=1e-8):
     """Solve for strip temperatures on a stack of sheets facing a hot source.
 
     F_src:     (n_k,) view factors from the source to the first sheet's strips.
@@ -148,12 +155,14 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
                sheet's front (equal spacing assumed).
     G_lateral: per sheet, (n_k - 1,) W/K conductances between neighbouring strips.
     G_gap:     (n_k,) W/K conductance through the air between facing strips.
-    h_exposed: h(T) for faces open to room air (first sheet's front, last sheet's back).
+    h_exposed: h(T) for faces open to the air (first sheet's front, last sheet's back).
     T_last:    fix the last sheet's temperature instead of solving for it.
+    T_air:     air temperature for h_exposed; defaults to T_amb.
 
     Returns (T, Q_src): T is (n_sheets, n_k) in K, Q_src the source's net radiation in W.
     """
     A_strip = np.atleast_1d(np.asarray(A_strip, dtype=float))
+    T_air = T_amb if T_air is None else T_air
     F_src = np.atleast_1d(F_src)
     F_gap = np.atleast_2d(F_gap)
     n_k, n_s = len(A_strip), len(sheet_eps)
@@ -216,11 +225,11 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
         if h_exposed is not None:
             h = h_exposed(T)
             dh = (h_exposed(T + 1e-3) - h) / 1e-3
-            res += exposed * h * (T_amb - T)
-            jac -= np.diag(exposed * (h + dh * (T - T_amb)))
+            res += exposed * h * (T_air - T)
+            jac -= np.diag(exposed * (h + dh * (T - T_air)))
         return res, jac, q[0]
 
-    T = np.full(n_u, 0.5 * (T_src + T_amb))
+    T = np.full(n_u, 0.5 * (T_src + max(T_amb, T_air)))
     free = np.ones(n_u, dtype=bool)
     if T_last is not None:
         free[-n_k:] = False
@@ -228,7 +237,7 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     for _ in range(200 if free.any() else 0):
         res, jac, _ = evaluate(T)
         step = np.clip(np.linalg.solve(jac[np.ix_(free, free)], -res[free]), -50, 50)
-        T[free] = np.maximum(T[free] + step, 0.5 * T_amb)
+        T[free] = np.maximum(T[free] + step, 0.5 * min(T_amb, T_air))
         if np.max(np.abs(step)) < tol:
             break
     else:
@@ -247,7 +256,8 @@ class Setup:
     plate_height: float = 0.220
     gap: float = 0.010
     T_tube: float = 650 + 273.15
-    T_amb: float = 25 + 273.15
+    T_amb: float = 25 + 273.15  # surroundings seen by radiation (box walls)
+    T_air: float | None = None  # air around the sheets; None means T_amb
     eps_tube: float = 0.8
     eps_plate: float = 0.8
     eps_shield: float = 0.2
@@ -273,6 +283,11 @@ class Result:
         return self.T_sheets[-1].max()
 
     @property
+    def T_shield_max(self):
+        """Hottest shield temperature, or nan with no shields."""
+        return self.T_sheets[:-1].max() if self.n_shields else np.nan
+
+    @property
     def T_plate_mean(self):
         return np.average(self.T_sheets[-1], weights=np.diff(self.z_edges))
 
@@ -286,6 +301,7 @@ def strip_edges(height, n_strips):
 def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
     """n_strips = 1 gives the lumped model (each sheet at one temperature)."""
     s = setup
+    T_air = s.T_amb if s.T_air is None else s.T_air
     r = s.tube_od / 2
     spacing = s.gap / (n_shields + 1)
     A_tube = np.pi * s.tube_od * s.length
@@ -303,14 +319,15 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
     g_shield = s.k_shield * s.shield_thickness * s.length / dz
     g_plate = s.k_plate * s.plate_thickness * s.length / dz
     # Air in the narrow gaps between sheets is treated as still (conduction, Nu = 1),
-    # evaluated at a fixed 200 C film temperature.
-    G_gap = k_air(473.15) * A_strip / spacing
+    # evaluated at a 200 C film temperature, or at the air temperature if hotter.
+    G_gap = k_air(max(473.15, T_air)) * A_strip / spacing
 
     T, Q = solve_stack(
         s.T_tube, A_tube, s.eps_tube, F_src, A_strip, sheet_eps, F_gap, s.T_amb,
         G_lateral=[g_shield] * n_shields + [g_plate],
         G_gap=G_gap,
-        h_exposed=lambda T: h_vertical_plate(T, s.T_amb, s.plate_height),
+        h_exposed=lambda T: h_vertical_plate(T, T_air, s.plate_height),
+        T_air=T_air,
     )
     return Result(n_shields, edges, T, Q)
 
@@ -322,3 +339,24 @@ def shields_required(setup: Setup, T_limit=150 + 273.15, n_max=10, use_peak=True
         if (res.T_plate_max if use_peak else res.T_plate_mean) < T_limit:
             return n
     return None
+
+
+def box_sweep(T_box, n_shields=(0, 1, 2, 3), eps_shield=(0.2, 0.45), setup=None, **kw):
+    """Peak plate and shield temperatures inside a box of still air (issue #4).
+
+    The box's air and walls are both at each temperature in T_box (K). Returns a list
+    of dicts with keys T_box, eps_shield, n_shields, T_plate_max and T_shield_max (K).
+    """
+    from dataclasses import replace
+
+    base = setup or Setup()
+    rows = []
+    for Tb in T_box:
+        for eps in eps_shield:
+            for n in n_shields:
+                if n == 0 and eps != eps_shield[0]:
+                    continue
+                res = solve(replace(base, T_amb=Tb, T_air=Tb, eps_shield=eps), n, **kw)
+                rows.append(dict(T_box=Tb, eps_shield=eps if n else np.nan, n_shields=n,
+                                 T_plate_max=res.T_plate_max, T_shield_max=res.T_shield_max))
+    return rows

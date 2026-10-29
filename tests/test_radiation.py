@@ -84,3 +84,53 @@ def test_lumped_plate_energy_balance():
     res = rad.solve(s, 0, n_strips=1)
     assert res.T_sheets.shape == (1, 1)
     assert s.T_amb < res.T_plate_max < s.T_tube
+
+
+def test_air_defaults_to_surroundings():
+    a = rad.solve(rad.Setup(), 1, n_strips=10)
+    b = rad.solve(rad.Setup(T_air=rad.Setup().T_amb), 1, n_strips=10)
+    assert np.allclose(a.T_sheets, b.T_sheets)
+
+
+def test_hotter_box_air_warms_the_plate():
+    s = rad.Setup()
+    cool = rad.solve(s, 1, n_strips=10)
+    warm_air = rad.solve(rad.Setup(T_air=s.T_amb + 100), 1, n_strips=10)
+    warm_box = rad.solve(rad.Setup(T_amb=s.T_amb + 100, T_air=s.T_amb + 100), 1, n_strips=10)
+    assert cool.T_plate_max < warm_air.T_plate_max < warm_box.T_plate_max
+
+
+def test_cold_tube_in_hot_box_reaches_box_temperature():
+    # With no heat source the sheets must settle at the box temperature.
+    T_box = 200 + 273.15
+    s = rad.Setup(T_tube=T_box, T_amb=T_box, T_air=T_box)
+    res = rad.solve(s, 2, n_strips=8)
+    assert np.allclose(res.T_sheets, T_box, atol=1e-6)
+
+
+def test_plate_runs_above_a_hot_box():
+    T_box = 150 + 273.15
+    s = rad.Setup(T_amb=T_box, T_air=T_box)
+    res = rad.solve(s, 3, n_strips=20)
+    assert T_box < res.T_plate_max < res.T_shield_max < s.T_tube
+    assert rad.shields_required(s, n_max=3, n_strips=20) is None
+
+
+def test_box_sweep_rows():
+    rows = rad.box_sweep([400.0, 450.0], n_shields=(0, 1), eps_shield=(0.2, 0.45), n_strips=8)
+    # One unshielded row plus one per emissivity, for each box temperature.
+    assert len(rows) == 6
+    assert np.isnan(rows[0]["T_shield_max"])
+    by_key = {(r["T_box"], r["n_shields"], r["eps_shield"]): r for r in rows if r["n_shields"]}
+    assert by_key[(450.0, 1, 0.2)]["T_plate_max"] > by_key[(400.0, 1, 0.2)]["T_plate_max"]
+    assert by_key[(400.0, 1, 0.45)]["T_shield_max"] > by_key[(400.0, 1, 0.2)]["T_shield_max"]
+
+
+def test_many_shields_leave_the_plate_above_a_hot_box():
+    # Air conduction across the gap sets a floor that extra shields can't remove.
+    T_box = 150 + 273.15
+    s = rad.Setup(T_amb=T_box, T_air=T_box, shield_thickness=0.1e-3)
+    p0, p4, p10 = (rad.solve(s, n, n_strips=20).T_plate_max for n in (0, 4, 10))
+    assert p10 < p4
+    assert p4 - p10 < 0.1 * (p0 - p4)
+    assert p10 > T_box
