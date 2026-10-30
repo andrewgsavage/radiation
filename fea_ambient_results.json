@@ -1,0 +1,650 @@
+[
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 177.6538979720578,
+  "mean": 130.18314794542096,
+  "hottest_sheet": 177.6538979720578
+ },
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 82.3741614723778,
+  "mean": 77.94584442068322,
+  "hottest_sheet": 183.49338444884455
+ },
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 75.73034431290978,
+  "mean": 73.75490688968841,
+  "hottest_sheet": 196.42170987698495
+ },
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 151.4414679175436,
+  "mean": 107.59437792996539,
+  "hottest_sheet": 151.4414679175436
+ },
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 105.79363627396089,
+  "mean": 90.69507523493877,
+  "hottest_sheet": 195.25979295008972
+ },
+ {
+  "T_box": 150,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 94.73513524545751,
+  "mean": 87.50164170502751,
+  "hottest_sheet": 203.19317483868525
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 168.23005581393875,
+  "mean": 126.30384145589471,
+  "hottest_sheet": 168.23005581393875
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 80.43814524667278,
+  "mean": 76.76660610542012,
+  "hottest_sheet": 173.9513135772931
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 74.37171500794642,
+  "mean": 72.70356763752204,
+  "hottest_sheet": 186.1418303369677
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 144.01197050246964,
+  "mean": 105.6311073172497,
+  "hottest_sheet": 144.01197050246964
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 102.21383278938413,
+  "mean": 89.12723514149008,
+  "hottest_sheet": 185.20797728703542
+ },
+ {
+  "T_box": 150,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 92.21359662578095,
+  "mean": 86.06890132068747,
+  "hottest_sheet": 192.7926557339049
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 119.89673896822103,
+  "mean": 107.69916961389163,
+  "hottest_sheet": 119.89673896822103
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 72.747387119336,
+  "mean": 71.57194696852235,
+  "hottest_sheet": 124.33494375536873
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 69.28056399852301,
+  "mean": 68.00356828600519,
+  "hottest_sheet": 131.83817110390828
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 107.22654313055284,
+  "mean": 96.75138595935732,
+  "hottest_sheet": 107.22654313055284
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 84.79844748710559,
+  "mean": 82.05222987367267,
+  "hottest_sheet": 131.88846770278667
+ },
+ {
+  "T_box": 150,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 81.48352091539027,
+  "mean": 79.55475507735724,
+  "hottest_sheet": 137.20287252233533
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 198.59251086383034,
+  "mean": 155.44984428996838,
+  "hottest_sheet": 198.59251086383034
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 96.90340756553815,
+  "mean": 93.98048546162272,
+  "hottest_sheet": 209.13643040132553
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 89.84236001754584,
+  "mean": 88.05086489528651,
+  "hottest_sheet": 225.30780032630963
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 172.1788368510048,
+  "mean": 132.56031876393172,
+  "hottest_sheet": 172.1788368510048
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 122.00366039291754,
+  "mean": 109.44758041559982,
+  "hottest_sheet": 223.05707097361267
+ },
+ {
+  "T_box": 200,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 110.3931444451128,
+  "mean": 105.24719491268417,
+  "hottest_sheet": 233.35846440921546
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 189.9103105566325,
+  "mean": 152.1163963508443,
+  "hottest_sheet": 189.9103105566325
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 95.12774768539589,
+  "mean": 92.95294572379362,
+  "hottest_sheet": 199.92248625129753
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 88.8651378264833,
+  "mean": 87.13767597598513,
+  "hottest_sheet": 215.26345988032756
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 165.44101519824284,
+  "mean": 130.8161535777587,
+  "hottest_sheet": 165.44101519824284
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 118.58231311438573,
+  "mean": 108.05177412053325,
+  "hottest_sheet": 213.2245762028635
+ },
+ {
+  "T_box": 200,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 108.03704971261305,
+  "mean": 103.98307507965046,
+  "hottest_sheet": 223.2043235679406
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 145.80968752200204,
+  "mean": 136.22239654142066,
+  "hottest_sheet": 145.80968752200204
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 91.57245656271732,
+  "mean": 88.48506600920496,
+  "hottest_sheet": 154.207020948714
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 86.12520559907364,
+  "mean": 83.16684034174074,
+  "hottest_sheet": 164.30983858516083
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 131.2229149371484,
+  "mean": 122.83975852210892,
+  "hottest_sheet": 131.2229149371484
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 104.31134678262612,
+  "mean": 101.9502236924074,
+  "hottest_sheet": 163.57506253765325
+ },
+ {
+  "T_box": 200,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 101.88440760744464,
+  "mean": 98.43334431653614,
+  "hottest_sheet": 170.80740413194053
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 222.340276883363,
+  "mean": 183.89740715430463,
+  "hottest_sheet": 222.340276883363
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 115.12199262124108,
+  "mean": 111.64857995182444,
+  "hottest_sheet": 236.25180687948517
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 107.44631249834015,
+  "mean": 103.67532173661004,
+  "hottest_sheet": 255.2329236102081
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 195.01261187396756,
+  "mean": 159.25662303357763,
+  "hottest_sheet": 195.01261187396756
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 139.34993188786694,
+  "mean": 129.85899978567022,
+  "hottest_sheet": 251.78063461404236
+ },
+ {
+  "T_box": 250,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 128.25853501146884,
+  "mean": 124.53190574380733,
+  "hottest_sheet": 264.4627377728266
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 214.41103740496567,
+  "mean": 181.0203229509318,
+  "hottest_sheet": 214.41103740496567
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 114.62871428174896,
+  "mean": 110.7525879314415,
+  "hottest_sheet": 227.92009964702822
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 106.93307524180562,
+  "mean": 102.89161611666958,
+  "hottest_sheet": 245.7455066355226
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 188.69765548468092,
+  "mean": 157.66318070603432,
+  "hottest_sheet": 188.69765548468092
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 136.2114263400611,
+  "mean": 128.63451414704576,
+  "hottest_sheet": 242.6196549492097
+ },
+ {
+  "T_box": 250,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 127.26979057858523,
+  "mean": 123.4266197187743,
+  "hottest_sheet": 254.7231485374249
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 173.8982932662239,
+  "mean": 167.32963183693363,
+  "hottest_sheet": 173.8982932662239
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 112.41333937060801,
+  "mean": 106.79275206023055,
+  "hottest_sheet": 185.31711664461386
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 104.67126372139523,
+  "mean": 99.47080600732909,
+  "hottest_sheet": 198.34694112425979
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 156.38441566212725,
+  "mean": 150.35536504975204,
+  "hottest_sheet": 156.38441566212725
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 128.25094220523346,
+  "mean": 123.23910952371824,
+  "hottest_sheet": 196.7551002589862
+ },
+ {
+  "T_box": 250,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 125.19436396026538,
+  "mean": 118.62049709404454,
+  "hottest_sheet": 206.02886699624304
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 248.35090990405695,
+  "mean": 214.99037096396535,
+  "hottest_sheet": 248.35090990405695
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 137.76499309742525,
+  "mean": 130.97355837566107,
+  "hottest_sheet": 265.1662055695697
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 127.4024919744869,
+  "mean": 120.67439832732975,
+  "hottest_sheet": 286.85327939792467
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 219.39797140941033,
+  "mean": 187.68799864089527,
+  "hottest_sheet": 219.39797140941033
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 158.15750591047197,
+  "mean": 152.0620091641855,
+  "hottest_sheet": 282.44313559334546
+ },
+ {
+  "T_box": 300,
+  "profile": "545°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 152.7348568325346,
+  "mean": 145.43865585923209,
+  "hottest_sheet": 296.87035119667655
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 241.08191347965828,
+  "mean": 212.50261295310924,
+  "hottest_sheet": 241.08191347965828
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 137.3517560570786,
+  "mean": 130.17433032673898,
+  "hottest_sheet": 257.4469603430997
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 126.97989217790996,
+  "mean": 119.99739862530095,
+  "hottest_sheet": 278.1734521553892
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 213.43518896365487,
+  "mean": 186.2200646965258,
+  "hottest_sheet": 213.43518896365487
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 155.87743496915147,
+  "mean": 150.97114295151135,
+  "hottest_sheet": 274.0793525793632
+ },
+ {
+  "T_box": 300,
+  "profile": "500°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 152.3598797264239,
+  "mean": 144.4794824075786,
+  "hottest_sheet": 287.95178277776324
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 0,
+  "peak": 203.84528824738493,
+  "mean": 200.7128565503429,
+  "hottest_sheet": 203.84528824738493
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 1,
+  "peak": 135.48467693563367,
+  "mean": 126.62280252771689,
+  "hottest_sheet": 223.68048975563426
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": true,
+  "shields": 2,
+  "peak": 125.09481352022664,
+  "mean": 117.00591764943204,
+  "hottest_sheet": 241.47962561263398
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 1,
+  "peak": 182.77219420897762,
+  "mean": 179.47837193797108,
+  "hottest_sheet": 182.77219420897762
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 2,
+  "peak": 154.58871574842027,
+  "mean": 146.11047171266398,
+  "hottest_sheet": 239.71257632613901
+ },
+ {
+  "T_box": 300,
+  "profile": "300°C",
+  "plate": false,
+  "shields": 3,
+  "peak": 150.677858372544,
+  "mean": 140.2486425651877,
+  "hottest_sheet": 251.10307744719648
+ }
+]

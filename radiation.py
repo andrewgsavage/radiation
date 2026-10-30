@@ -139,38 +139,44 @@ def tube_to_rectangle(radius, length, distance, z_lo, z_hi, n_phi=360, n_x=80):
 
 def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
                 G_lateral=None, G_gap=None, h_exposed=None, T_last=None, tol=1e-8):
-    """Solve for strip temperatures on a stack of sheets facing a hot source.
+    """Solve for patch temperatures on a stack of sheets facing hot source surfaces.
 
-    F_src:     (n_k,) view factors from the source to the first sheet's strips.
-    A_strip:   (n_k,) strip areas, the same on every sheet.
+    The source is one or more surfaces at fixed temperature (e.g. tube segments) that
+    see only the first sheet. Each sheet is split into the same n_k patches.
+
+    T_src, A_src: (n_src,) source temperatures and areas (scalars for a single source).
+    F_src:     (n_src, n_k) view factors from each source surface to the first sheet's patches.
+    A_strip:   (n_k,) patch areas, the same on every sheet.
     sheet_eps: [(eps_front, eps_back), ...] from the source outward; the last is the plate.
-    F_gap:     (n_k, n_k) strip-to-strip view factors from one sheet's back to the next
+    F_gap:     (n_k, n_k) patch-to-patch view factors from one sheet's back to the next
                sheet's front (equal spacing assumed).
-    G_lateral: per sheet, (n_k - 1,) W/K conductances between neighbouring strips.
-    G_gap:     (n_k,) W/K conductance through the air between facing strips.
+    G_lateral: per sheet, a symmetric (n_k, n_k) matrix of W/K conductances between patches.
+    G_gap:     (n_k,) W/K conductance through the air between facing patches.
     h_exposed: h(T) for faces open to room air (first sheet's front, last sheet's back).
     T_last:    fix the last sheet's temperature instead of solving for it.
 
-    Returns (T, Q_src): T is (n_sheets, n_k) in K, Q_src the source's net radiation in W.
+    Returns (T, Q_src): T is (n_sheets, n_k) in K, Q_src the sources' total net radiation in W.
     """
+    T_src = np.atleast_1d(np.asarray(T_src, dtype=float))
+    A_src = np.broadcast_to(np.asarray(A_src, dtype=float), T_src.shape)
     A_strip = np.atleast_1d(np.asarray(A_strip, dtype=float))
-    F_src = np.atleast_1d(F_src)
+    F_src = np.atleast_2d(F_src)
     F_gap = np.atleast_2d(F_gap)
-    n_k, n_s = len(A_strip), len(sheet_eps)
+    n_f, n_k, n_s = len(T_src), len(A_strip), len(sheet_eps)
     n_u = n_s * n_k
-    m = 1 + 2 * n_u
-    front = lambda j: slice(1 + 2 * j * n_k, 1 + (2 * j + 1) * n_k)
-    back = lambda j: slice(1 + (2 * j + 1) * n_k, 1 + (2 * j + 2) * n_k)
+    m = n_f + 2 * n_u
+    front = lambda j: slice(n_f + 2 * j * n_k, n_f + (2 * j + 1) * n_k)
+    back = lambda j: slice(n_f + (2 * j + 1) * n_k, n_f + (2 * j + 2) * n_k)
 
     F = np.zeros((m, m))
-    F[0, front(0)] = F_src
-    F[front(0), 0] = A_src * F_src / A_strip
+    F[:n_f, front(0)] = F_src
+    F[front(0), :n_f] = (A_src[:, None] * F_src).T / A_strip[:, None]
     for j in range(n_s - 1):
         F[back(j), front(j + 1)] = F_gap
         F[front(j + 1), back(j)] = (A_strip[:, None] * F_gap).T / A_strip[:, None]
     F_amb = 1 - F.sum(axis=1)
-    eps = np.concatenate([[eps_src]] + [np.r_[np.full(n_k, a), np.full(n_k, b)] for a, b in sheet_eps])
-    area = np.concatenate([[A_src], np.tile(A_strip, 2 * n_s)])
+    eps = np.concatenate([np.full(n_f, eps_src)] + [np.r_[np.full(n_k, a), np.full(n_k, b)] for a, b in sheet_eps])
+    area = np.concatenate([A_src, np.tile(A_strip, 2 * n_s)])
     Eb_amb = SIGMA * T_amb**4
 
     # Net radiation leaving each surface is linear in E_b = sigma T^4: q = R E_b + q0.
@@ -178,55 +184,50 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     R = area[:, None] * (np.eye(m) - F) @ np.linalg.inv(M)
     q0 = R @ ((1 - eps) * F_amb * Eb_amb) - area * F_amb * Eb_amb
     R = R * eps[None, :]
+    R_ss, R_sf = R[n_f:, n_f:], R[n_f:, :n_f]
 
-    # P maps unknown strip temperatures onto the front and back surfaces they set.
-    P = np.zeros((m - 1, n_u))
+    # P maps unknown patch temperatures onto the front and back surfaces they set.
+    P = np.zeros((m - n_f, n_u))
     for j in range(n_s):
         block = slice(j * n_k, (j + 1) * n_k)
         P[2 * j * n_k:(2 * j + 1) * n_k, block] = np.eye(n_k)
         P[(2 * j + 1) * n_k:(2 * j + 2) * n_k, block] = np.eye(n_k)
 
-    # Linear conduction network (W/K): along each sheet and across the air gaps.
-    K = np.zeros((n_u, n_u))
-
-    def link(a, b, g):
-        K[a, a] -= g
-        K[b, b] -= g
-        K[a, b] += g
-        K[b, a] += g
-
+    # Linear conduction network (W/K): within each sheet and across the air gaps.
+    G = np.zeros((n_u, n_u))
     for j in range(n_s):
+        block = slice(j * n_k, (j + 1) * n_k)
         if G_lateral is not None:
-            for k in range(n_k - 1):
-                link(j * n_k + k, j * n_k + k + 1, G_lateral[j][k])
+            G[block, block] = G_lateral[j]
         if j < n_s - 1 and G_gap is not None:
-            for k in range(n_k):
-                link(j * n_k + k, (j + 1) * n_k + k, G_gap[k])
+            nxt = slice((j + 1) * n_k, (j + 2) * n_k)
+            G[block, nxt] = G[nxt, block] = np.diag(G_gap)
+    K = G - np.diag(G.sum(axis=1))
 
     exposed = np.zeros(n_u)
     exposed[:n_k] += A_strip
     exposed[-n_k:] += A_strip
+    Eb_src = SIGMA * T_src**4
 
     def evaluate(T):
-        Eb = SIGMA * np.concatenate([[T_src], P @ T]) ** 4
-        q = R @ Eb + q0
-        res = -P.T @ q[1:] + K @ T
-        dEb = 4 * SIGMA * (P @ T) ** 3
-        jac = -P.T @ (R[1:, 1:] * dEb[None, :]) @ P + K
+        Eb = SIGMA * (P @ T) ** 4
+        q_sheets = R_ss @ Eb + R_sf @ Eb_src + q0[n_f:]
+        res = -P.T @ q_sheets + K @ T
+        jac = -P.T @ (R_ss * (4 * SIGMA * (P @ T) ** 3)[None, :]) @ P + K
         if h_exposed is not None:
             h = h_exposed(T)
             dh = (h_exposed(T + 1e-3) - h) / 1e-3
             res += exposed * h * (T_amb - T)
             jac -= np.diag(exposed * (h + dh * (T - T_amb)))
-        return res, jac, q[0]
+        return res, jac
 
-    T = np.full(n_u, 0.5 * (T_src + T_amb))
+    T = np.full(n_u, 0.5 * (T_src.max() + T_amb))
     free = np.ones(n_u, dtype=bool)
     if T_last is not None:
         free[-n_k:] = False
         T[~free] = T_last
     for _ in range(200 if free.any() else 0):
-        res, jac, _ = evaluate(T)
+        res, jac = evaluate(T)
         step = np.clip(np.linalg.solve(jac[np.ix_(free, free)], -res[free]), -50, 50)
         T[free] = np.maximum(T[free] + step, 0.5 * T_amb)
         if np.max(np.abs(step)) < tol:
@@ -235,7 +236,17 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
         if free.any():
             raise RuntimeError("sheet temperatures did not converge")
 
-    return T.reshape(n_s, n_k), evaluate(T)[2]
+    Q_src = (R[:n_f, :n_f] @ Eb_src + R[:n_f, n_f:] @ (SIGMA * (P @ T) ** 4) + q0[:n_f]).sum()
+    return T.reshape(n_s, n_k), Q_src
+
+
+def chain_conductance(g):
+    """(n_k, n_k) conductance matrix for strips linked in a line by conductances g (n_k - 1,)."""
+    n = len(g) + 1
+    G = np.zeros((n, n))
+    i = np.arange(n - 1)
+    G[i, i + 1] = G[i + 1, i] = g
+    return G
 
 
 # --- the issue #1 problem
@@ -261,13 +272,14 @@ class Setup:
 class Result:
     n_shields: int
     z_edges: np.ndarray  # strip edges, m
-    T_sheets: np.ndarray  # (n_shields + 1, n_strips) K, shields then plate
+    T_sheets: np.ndarray  # (n_sheets, n_strips) K, from the tube outward; the plate is last if present
     Q_radiation: float  # W, tube's net radiation
 
     @property
     def z(self):
         return 0.5 * (self.z_edges[1:] + self.z_edges[:-1])
 
+    # "plate" below means the outermost sheet: the plate, or the last shield if there is no plate.
     @property
     def T_plate_max(self):
         return self.T_sheets[-1].max()
@@ -283,11 +295,17 @@ def strip_edges(height, n_strips):
     return height / 2 * np.sign(u) * np.abs(u) ** 1.5
 
 
-def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
-    """n_strips = 1 gives the lumped model (each sheet at one temperature)."""
+def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = True) -> Result:
+    """n_strips = 1 gives the lumped model (each sheet at one temperature).
+
+    plate=False removes the plate: the outermost shield takes its place, a gap away
+    from the tube, and the other shields are evenly spaced inside it.
+    """
+    if not plate and n_shields < 1:
+        raise ValueError("need at least one shield when there is no plate")
     s = setup
     r = s.tube_od / 2
-    spacing = s.gap / (n_shields + 1)
+    spacing = s.gap / (n_shields + 1 if plate else n_shields)
     A_tube = np.pi * s.tube_od * s.length
 
     edges = strip_edges(s.plate_height, n_strips)
@@ -297,7 +315,7 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
     F_src = np.array([tube_to_rectangle(r, s.length, r + spacing, lo, hi)
                       for lo, hi in zip(edges[:-1], edges[1:])])
     F_gap = parallel_strips(s.length, edges, edges, spacing)
-    sheet_eps = [(s.eps_shield, s.eps_shield)] * n_shields + [(s.eps_plate, s.eps_plate)]
+    sheet_eps = [(s.eps_shield, s.eps_shield)] * n_shields + [(s.eps_plate, s.eps_plate)] * plate
 
     dz = np.diff(z)
     g_shield = s.k_shield * s.shield_thickness * s.length / dz
@@ -308,17 +326,17 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60) -> Result:
 
     T, Q = solve_stack(
         s.T_tube, A_tube, s.eps_tube, F_src, A_strip, sheet_eps, F_gap, s.T_amb,
-        G_lateral=[g_shield] * n_shields + [g_plate],
+        G_lateral=[chain_conductance(g_shield)] * n_shields + [chain_conductance(g_plate)] * plate,
         G_gap=G_gap,
         h_exposed=lambda T: h_vertical_plate(T, s.T_amb, s.plate_height),
     )
     return Result(n_shields, edges, T, Q)
 
 
-def shields_required(setup: Setup, T_limit=150 + 273.15, n_max=10, use_peak=True, **kw):
-    """Smallest number of shields that keeps the plate below T_limit, or None."""
-    for n in range(n_max + 1):
-        res = solve(setup, n, **kw)
+def shields_required(setup: Setup, T_limit=150 + 273.15, n_max=10, use_peak=True, plate=True, **kw):
+    """Smallest number of shields that keeps the outermost sheet below T_limit, or None."""
+    for n in range(0 if plate else 1, n_max + 1):
+        res = solve(setup, n, plate=plate, **kw)
         if (res.T_plate_max if use_peak else res.T_plate_mean) < T_limit:
             return n
     return None
