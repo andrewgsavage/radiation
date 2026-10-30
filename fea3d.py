@@ -97,9 +97,13 @@ def layout(setup: rad.Setup, n_shields, plate=True):
 
 
 def solve_fea(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100, 0.300),
-              plate_x0=0.130, n_x=20, n_z=30, n_y=2, n_segments=40, tol=1e-6) -> FEAResult:
+              plate_x0=0.130, n_x=20, n_z=30, n_y=2, n_segments=40, T_outside=None, tol=1e-6) -> FEAResult:
     """Sheets span x in [plate_x0, plate_x0 + setup.length] and the plate's full height.
-    The tube spans tube_x with temperatures from `profile` (radiation3d.load_tube_profiles)."""
+    The tube spans tube_x with temperatures from `profile` (radiation3d.load_tube_profiles).
+
+    T_outside: if given, the outermost sheet's back face radiates and convects to air and
+    surroundings at this temperature instead of setup.T_amb (the sheets form a wall between
+    a box interior at setup.T_amb and the outside). Everything else sees setup.T_amb."""
     if not plate and n_shields < 1:
         raise ValueError("need at least one shield when there is no plate")
     s = setup
@@ -154,7 +158,10 @@ def solve_fea(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100,
     F_amb = 1 - F.sum(axis=1)
     eps = np.concatenate([np.full(n_f, s.eps_tube)] + [np.full(2 * n_p, sh.eps) for sh in sheets])
     area = np.concatenate([A_seg, np.tile(A_p, 2 * n_s)])
-    Eb_amb = rad.SIGMA * s.T_amb**4
+    T_out = s.T_amb if T_outside is None else T_outside
+    T_env = np.full(m, s.T_amb)
+    T_env[back(n_s - 1)] = T_out
+    Eb_amb = rad.SIGMA * T_env**4
     Mrad = np.eye(m) - (1 - eps)[:, None] * F
     R = area[:, None] * (np.eye(m) - F) @ np.linalg.inv(Mrad)
     q0 = R @ ((1 - eps) * F_amb * Eb_amb) - area * F_amb * Eb_amb
@@ -177,7 +184,8 @@ def solve_fea(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100,
     exposed = np.zeros(n_faces)
     exposed[:n_p] = A_p
     exposed[-n_p:] = A_p
-    h_of = lambda T: rad.h_vertical_plate(T, s.T_amb, s.plate_height)
+    T_air = T_env[n_f:]
+    h_of = lambda T: rad.h_vertical_plate(T, T_air, s.plate_height)
 
     # --- Newton on K T + Mf^T q_out(Mf T) = 0; GMRES with a sparse preconditioner
     T = np.full(offset, s.T_amb + 100.0)
@@ -185,10 +193,10 @@ def solve_fea(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100,
         Tf = Mf @ T
         h = h_of(Tf)
         dh = (h_of(Tf + 1e-3) - h) / 1e-3
-        q = R_ss @ (rad.SIGMA * Tf**4) + q_fixed + exposed * h * (Tf - s.T_amb) + G @ Tf
+        q = R_ss @ (rad.SIGMA * Tf**4) + q_fixed + exposed * h * (Tf - T_air) + G @ Tf
         res = K @ T + Mf.T @ q
         d_rad = 4 * rad.SIGMA * Tf**3
-        d_conv = exposed * (h + dh * (Tf - s.T_amb))
+        d_conv = exposed * (h + dh * (Tf - T_air))
         lu = spla.splu((K + Mf.T @ (sp.diags(np.diag(R_ss) * d_rad + d_conv) + G) @ Mf).tocsc())
 
         def matvec(v):
@@ -201,7 +209,7 @@ def solve_fea(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100,
         if info != 0:
             raise RuntimeError(f"GMRES did not converge (info={info})")
         step = np.clip(step, -50, 50)
-        T = np.maximum(T + step, 0.5 * s.T_amb)
+        T = np.maximum(T + step, 0.5 * min(s.T_amb, T_out))
         if np.max(np.abs(step)) < tol:
             break
     else:

@@ -1,5 +1,5 @@
-"""FEA case matrix with the box interior (air and surroundings) at raised temperatures;
-writes fea_ambient_results.json."""
+"""FEA case matrix with the box interior (tube side) at raised temperatures and the
+outermost sheet's back face open to 30 C outside air; writes fea_ambient_results.json."""
 
 import json
 from dataclasses import replace
@@ -16,7 +16,7 @@ for T_box in (150, 200, 250, 300):
     for name, profile in profiles.items():
         for plate, counts in ((True, (0, 1, 2)), (False, (1, 2, 3))):
             for n in counts:
-                f = fea3d.solve_fea(s, profile, n, plate=plate)
+                f = fea3d.solve_fea(s, profile, n, plate=plate, T_outside=30 + C)
                 row = dict(T_box=T_box, profile=name, plate=plate, shields=n, peak=f.T_plate_max - C,
                            mean=f.T_plate_mean - C, hottest_sheet=max(T.max() for T in f.T) - C)
                 rows.append(row)

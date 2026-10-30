@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -29,6 +31,19 @@ def test_sheets_cool_outward():
     f = fea3d.solve_fea(S, UNIFORM, 2, **COARSE)
     peaks = [T.max() for T in f.T]
     assert S.T_amb < peaks[-1] < peaks[0] < S.T_tube
+
+
+def test_outside_at_box_temperature_matches_default():
+    a = fea3d.solve_fea(S, UNIFORM, 1, **COARSE)
+    b = fea3d.solve_fea(S, UNIFORM, 1, T_outside=S.T_amb, **COARSE)
+    assert b.T_plate_max == pytest.approx(a.T_plate_max, abs=1e-6)
+
+
+def test_cooler_outside_cools_the_outer_sheet():
+    hot_box = replace(S, T_amb=150 + C)
+    a = fea3d.solve_fea(hot_box, UNIFORM, 1, **COARSE)
+    b = fea3d.solve_fea(hot_box, UNIFORM, 1, T_outside=30 + C, **COARSE)
+    assert b.T_plate_max < a.T_plate_max
 
 
 def test_layout_spacing():
