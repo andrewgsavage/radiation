@@ -189,7 +189,7 @@ def solve3d(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100, 0
     T, Q = rad.solve_stack(
         seg_T, A_seg, s.eps_tube, F_src, A_patch, sheet_eps, F_gap, s.T_amb,
         G_lateral=[G_shield] * n_shields + [G_plate] * plate,
-        G_gap=rad.k_air(473.15) * A_patch / spacing,
+        G_gap=lambda T_mean: rad.k_air(T_mean) * A_patch / spacing,
         h_exposed=lambda T: rad.h_vertical_plate(T, s.T_amb, s.plate_height),
         convect_front=convect_front,
     )

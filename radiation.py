@@ -152,7 +152,9 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     F_gap:     (n_k, n_k) patch-to-patch view factors from one sheet's back to the next
                sheet's front (equal spacing assumed).
     G_lateral: per sheet, a symmetric (n_k, n_k) matrix of W/K conductances between patches.
-    G_gap:     (n_k,) W/K conductance through the air between facing patches.
+    G_gap:     (n_k,) W/K conductance through the air between facing patches, or a function
+               of the facing patches' mean temperature returning it (so k_air can follow
+               each gap's own temperature).
     h_exposed: h(T) for faces open to room air (first sheet's front, last sheet's back).
     T_last:    fix the last sheet's temperature instead of solving for it.
     convect_front: if False, only the last sheet's back face loses heat to room air.
@@ -201,10 +203,20 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
         block = slice(j * n_k, (j + 1) * n_k)
         if G_lateral is not None:
             G[block, block] = G_lateral[j]
-        if j < n_s - 1 and G_gap is not None:
-            nxt = slice((j + 1) * n_k, (j + 2) * n_k)
-            G[block, nxt] = G[nxt, block] = np.diag(G_gap)
-    K = G - np.diag(G.sum(axis=1))
+    K_lat = G - np.diag(G.sum(axis=1))
+
+    def gap_matrix(T):
+        """Conduction matrix across the air gaps, at the current temperatures."""
+        Gg = np.zeros((n_u, n_u))
+        if G_gap is None or n_s < 2:
+            return Gg
+        Ts = T.reshape(n_s, n_k)
+        for j in range(n_s - 1):
+            g = G_gap(0.5 * (Ts[j] + Ts[j + 1])) if callable(G_gap) else G_gap
+            a = slice(j * n_k, (j + 1) * n_k)
+            b = slice((j + 1) * n_k, (j + 2) * n_k)
+            Gg[a, b] = Gg[b, a] = np.diag(g)
+        return Gg - np.diag(Gg.sum(axis=1))
 
     exposed = np.zeros(n_u)
     if convect_front:
@@ -213,6 +225,9 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     Eb_src = SIGMA * T_src**4
 
     def evaluate(T):
+        # The gap conductances' own temperature dependence is left out of the Jacobian;
+        # it is weak (k ~ T^0.8), so the iteration still converges.
+        K = K_lat + gap_matrix(T)
         Eb = SIGMA * (P @ T) ** 4
         q_sheets = R_ss @ Eb + R_sf @ Eb_src + q0[n_f:]
         res = -P.T @ q_sheets + K @ T
@@ -330,8 +345,8 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = Tr
     g_shield = s.k_shield * s.shield_thickness * s.length / dz
     g_plate = s.k_plate * s.plate_thickness * s.length / dz
     # Air in the narrow gaps between sheets is treated as still (conduction, Nu = 1),
-    # evaluated at a fixed 200 C film temperature.
-    G_gap = k_air(473.15) * A_strip / spacing
+    # with k_air at the mean temperature of the two facing strips.
+    G_gap = lambda T_mean: k_air(T_mean) * A_strip / spacing
 
     T, Q = solve_stack(
         s.T_tube, A_tube, s.eps_tube, F_src, A_strip, sheet_eps, F_gap, s.T_amb,

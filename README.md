@@ -58,95 +58,53 @@ a second one.
 
 ## Outer-face convection only (issue #8)
 
-2D model, tube at a constant 650 °C, and only the face furthest from the tube loses heat
-to room air by convection (`solve(..., convect_front=False)`). Run `python study_issue8.py`.
-Peak of the outermost sheet, °C:
+No plate, and only the face furthest from the tube loses heat to room air by convection
+(`convect_front=False`). Shields are 0.5 mm stainless (k = 16 W/m·K) unless stated. The limit is
+**80 °C on the outermost shield**, and the total length (tube surface to outer face, gaps plus
+shield thickness) is kept **under 20 mm**. Air in the gaps between shields is still air
+(conduction only), with k_air at each gap's own mean temperature; the gap between the tube
+and the first shield is radiation only. Every 3D point solved is in `issue8_3d_results.csv`
+(`issue8_3d_results_fixed_kair.csv` holds the earlier runs with k_air fixed at 200 °C);
+`python summarise_issue8.py` prints the tables below from it.
 
-| Every gap (tube→sheet, sheet→sheet) | Plate, 0 / 1 / 2 shields | No plate, 1 / 2 / 3 shields | Shields needed (plate / no plate) |
+**2D, tube at a constant 650 °C** (`python plot_issue8.py`): fewest shields 4 at 3 mm
+(14 mm, 79 °C); shortest stack 8 at 1 mm (12 mm, 79 °C). `python study_issue8.py` also has
+the plate cases and wider spacings.
+
+**3D, measured tube profiles**, 0.5 mm stainless (`python plot_issue8_3d.py`):
+
+| Profile | Shield ε | Fewest shields | Shortest stack |
 |---|---|---|---|
-| 2 mm | 244 / 95 / 81 | 205 / 142 / 112 | 1 / 2 |
-| 5 mm | 230 / 82 / 64 | 189 / 114 / 82 | 1 / 2 |
-| 10 mm | 210 / 69 / 50 | 168 / 89 / 60 | 1 / 2 |
-| 20 mm | 181 / 56 / 38 | 139 / 65 / 43 | 1 / 1 |
-| 40 mm | 142 / 42 / 30 | 105 / 46 / 32 | 0 / 1 |
+| "545" | 0.2 | 2 at 5 mm (11 mm, 77 °C) | 5 at 0.5 mm (5 mm, 75 °C) |
+| "545" | 0.4 | 3 at 4 mm (13.5 mm, 74 °C) | 7 at 0.5 mm (7 mm, 79 °C) |
+| "500" | 0.2 | 2 at 4 mm (9 mm, 76 °C) | 4 at 0.5 mm (4 mm, 76 °C) |
+| "500" | 0.4 | 3 at 3 mm (10.5 mm, 76 °C) | 6 at 0.5 mm (6 mm, 80 °C) |
+| "300" | 0.2 | 1 at any spacing | 1 at 0.5 mm (1 mm, 70 °C) |
+| "300" | 0.4 | 1 at 10 mm (10.5 mm, 78 °C) | 2 at 0.5 mm (2 mm, 74 °C) |
 
-**With a plate, one shield; with no plate, two shields** at spacings up to 10 mm. Losing
-the tube-side convection raises temperatures (plate with no shields: 210 °C, against 188 °C
-in issue #1). Wider spacing helps because the sheets are finite (140 × 220 mm): more of
-each sheet's radiation escapes past the edges instead of reaching the next sheet. Squeezing
-more shields into a fixed 10 mm gap gives diminishing returns (no plate: 168, 114, 96, 87 °C
-for 1–4 shields), since the gaps thin out and air conduction across them takes over.
+**Shield material and thickness**, "545" profile only (`plot_issue8_3d_thickness.py`,
+`plot_issue8_3d_aluminium.py`, `plot_issue8_3d_foil.py`; aluminium k = 200 W/m·K):
 
-With an **80 °C limit** and the stack kept under 20 mm from the tube surface, counting
-the 0.5 mm thickness of each stainless shield (`python plot_issue8.py`): the fewest shields
-is 4 at 4 mm spacing (18 mm, 72 °C), and the shortest stack is 9 at 1 mm spacing
-(13.5 mm, 77 °C). Packing shields closer than 1 mm makes the stack longer, because
-the shields' own thickness then outweighs the gaps.
-
-### Issue #8 in 3D, measured tube temperatures
-
-Same setup (no plate, outer-face convection only, 80 °C limit, under 20 mm including 0.5 mm
-shields), with the `astral_temps.csv` profiles (`python plot_issue8_3d.py`, ~10 min).
-Because the tube is only near its peak over the middle ~50 mm, far fewer shields are needed than in 2D:
-
-| Profile | Fewest shields | Shortest stack |
-|---|---|---|
-| "545" | 2 at 7.5 mm (16 mm, 71 °C); 2 at 5 mm is marginal (79 °C) | 5 at 0.5 mm (5 mm, 77 °C) |
-| "500" | 2 at 4 mm (9 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
-| "300" | 1 at any spacing (70 °C or less) | 1 at 0.5 mm (1 mm, 70 °C) |
-
-With **ε = 0.4 shields** (oxidised stainless), the second row of the plot:
-
-| Profile | Fewest shields | Shortest stack |
-|---|---|---|
-| "545" | 3 at 4 mm (13.5 mm, 77 °C) | 8 at 0.5 mm (8 mm, 78 °C) |
-| "500" | 3 at 3 mm (10.5 mm, 79 °C) | 7 at 0.5 mm (7 mm, 77 °C) |
-| "300" | 1 at 10 mm (10.5 mm, 78 °C) | 2 at 0.5 mm (2 mm, 75 °C) |
-
-Every solved point is in `issue8_3d_results.csv`.
-
-**Shield thickness**, "545" profile only (`python plot_issue8_3d_thickness.py`):
-
-| Shield ε | Thickness | Fewest shields | Shortest stack |
+| Shield | ε | Fewest shields | Shortest stack |
 |---|---|---|---|
-| 0.2 | 1 mm | 2 at 3 mm (8 mm, 75 °C) | 3 at 0.5 mm (4.5 mm, 80 °C, marginal) |
-| 0.2 | 0.5 mm | 2 at 5 mm (11 mm, 79 °C) | 5 at 0.5 mm (5 mm, 77 °C) |
-| 0.2 | 0.25 mm | 3 at 4 mm (12.75 mm, 74 °C) | 7 at 0.5 mm (5.25 mm, 78 °C) |
-| 0.4 | 1 mm | 2 at 7.5 mm (17 mm, 77 °C) | 6 at 0.5 mm (9 mm, 79 °C) |
-| 0.4 | 0.5 mm | 3 at 4 mm (13.5 mm, 77 °C) | 8 at 0.5 mm (8 mm, 78 °C) |
-| 0.4 | 0.25 mm | 4 at 3 mm (13 mm, 78 °C) | 10 at 0.5 mm (7.5 mm, 78 °C) |
+| Stainless 1 mm | 0.2 | 2 at 2 mm (6 mm, 79 °C) | 3 at 0.5 mm (4.5 mm, 78 °C) |
+| Stainless 1 mm | 0.4 | 2 at 7.5 mm (17 mm, 76 °C) | 4 at 1 mm (8 mm, 78 °C) |
+| Stainless 0.25 mm | 0.2 | 3 at 3 mm (9.75 mm, 78 °C) | 7 at 0.5 mm (5.25 mm, 75 °C) |
+| Stainless 0.25 mm | 0.4 | 4 at 3 mm (13 mm, 76 °C) | 9 at 0.5 mm (6.75 mm, 80 °C) |
+| Aluminium 1 mm | 0.1 | 1 (1.5 mm, 57 °C) | same |
+| Aluminium 1 mm | 0.2 | 1 (1.5 mm, 74 °C) | same |
+| Aluminium 1 mm | 0.4 | 2 at 1 mm (4 mm, 80 °C) | same |
+| Aluminium 0.5 mm | 0.1 | 1 (1 mm, 60 °C) | same |
+| Aluminium 0.5 mm | 0.2 | 1 at 1 mm (1.5 mm, 80 °C, marginal) | same |
+| Aluminium 0.5 mm | 0.4 | 2 at 2 mm (5 mm, 77 °C) | 3 at 0.5 mm (3 mm, 80 °C) |
+| Aluminium foil 15 µm | 0.05 | 1 at 5 mm (5 mm, 79 °C) | 2 at 0.5 mm (1 mm, 72 °C) |
+| Aluminium foil 15 µm | 0.1 | 2 at 4 mm (8 mm, 79 °C) | 4 at 0.5 mm (2 mm, 78 °C) |
+| Aluminium foil 15 µm | 0.2 | 3 at 4 mm (12 mm, 76 °C) | 8 at 0.5 mm (4.1 mm, 75 °C) |
 
-Thicker shields run cooler: they conduct more heat sideways, spreading the hot spot
-opposite the tube's peak. 1 mm shields need one fewer shield than 0.5 mm, and give the
-shortest stack at ε = 0.2 despite their own thickness; 0.25 mm shields need one more.
-
-**Aluminium shields** (k = 200 W/m·K against stainless at 16), "545" profile
-(`python plot_issue8_3d_aluminium.py`):
-
-| Shield ε | Thickness | Fewest shields | Shortest stack |
-|---|---|---|---|
-| 0.1 | 0.5 mm | 1 at 0.5 mm (1 mm, 60 °C) | same |
-| 0.1 | 1 mm | 1 at 0.5 mm (1.5 mm, 57 °C) | same |
-| 0.2 | 0.5 mm | 1 at 1 mm (1.5 mm, 80 °C, marginal) | same |
-| 0.2 | 1 mm | 1 at 0.5 mm (1.5 mm, 74 °C) | same |
-| 0.4 | 0.5 mm | 2 at 2 mm (5 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
-| 0.4 | 1 mm | 2 at 2 mm (6 mm, 76 °C) | 3 at 0.5 mm (4.5 mm, 80 °C, marginal) |
-
-Aluminium spreads the hot spot over the whole sheet, so a single shield is enough unless it
-is oxidised or painted (ε = 0.4).
-
-**15 µm aluminium foil** shields, "545" profile (`python plot_issue8_3d_foil.py`, at most 15
-foils per stack):
-
-| Foil ε | Fewest shields | Shortest stack |
-|---|---|---|
-| 0.05 | 1 at 7.5 mm (75 °C); 1 at 5 mm is marginal (79 °C) | 2 at 0.5 mm (1 mm, 72 °C) |
-| 0.1 | 2 at 5 mm (10 mm, 76 °C) | 5 at 0.5 mm (2.6 mm, 73 °C) |
-| 0.2 | 3 at 4 mm (12 mm, 79 °C) | 8 at 0.5 mm (4.1 mm, 78 °C) |
-
-Foil is too thin to spread heat sideways (k·t is below 0.25 mm stainless), so it relies on
-low emissivity, but with almost no thickness, many closely spaced foils make a very
-short stack.
+What matters, in order: **emissivity**, then **sideways conduction** (k × thickness), which
+spreads the hot spot opposite the tube's peak over the sheet. A single 1 mm aluminium shield
+at ε ≤ 0.2 is enough. For a given length, closer spacing with more shields runs cooler,
+until each shield's own thickness outweighs the gaps.
 
 ## Running
 
