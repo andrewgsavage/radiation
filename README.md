@@ -77,9 +77,11 @@ each sheet's radiation escapes past the edges instead of reaching the next sheet
 more shields into a fixed 10 mm gap gives diminishing returns (no plate: 168, 114, 96, 87 °C
 for 1–4 shields), since the gaps thin out and air conduction across them takes over.
 
-With an **80 °C limit** and the stack kept under 20 mm from the tube surface
-(`python plot_issue8.py`): the fewest shields is 4 at 4 mm spacing (16 mm, 72 °C), and the
-shortest stack is 9 at 1 mm spacing (9 mm, 77 °C).
+With an **80 °C limit** and the stack kept under 20 mm from the tube surface, counting
+the 0.5 mm thickness of each stainless shield (`python plot_issue8.py`): the fewest shields
+is 4 at 4 mm spacing (18 mm, 72 °C), and the shortest stack is 9 at 1 mm spacing
+(13.5 mm, 77 °C). Packing shields closer than 1 mm makes the stack longer, because
+the shields' own thickness then outweighs the gaps.
 
 ## Running
 
