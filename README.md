@@ -95,6 +95,16 @@ Because the tube is only near its peak over the middle ~50 mm, far fewer shields
 | "500" | 2 at 4 mm (9 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
 | "300" | 1 at any spacing (70 °C or less) | 1 at 0.5 mm (1 mm, 70 °C) |
 
+With **ε = 0.4 shields** (oxidised stainless), the second row of the plot:
+
+| Profile | Fewest shields | Shortest stack |
+|---|---|---|
+| "545" | 3 at 4 mm (13.5 mm, 77 °C) | 8 at 0.5 mm (8 mm, 78 °C) |
+| "500" | 3 at 3 mm (10.5 mm, 79 °C) | 7 at 0.5 mm (7 mm, 77 °C) |
+| "300" | 1 at 10 mm (10.5 mm, 78 °C) | 2 at 0.5 mm (2 mm, 75 °C) |
+
+Every solved point is in `issue8_3d_results.csv`.
+
 ## Running
 
 ```bash
