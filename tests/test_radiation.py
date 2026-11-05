@@ -84,3 +84,18 @@ def test_lumped_plate_energy_balance():
     res = rad.solve(s, 0, n_strips=1)
     assert res.T_sheets.shape == (1, 1)
     assert s.T_amb < res.T_plate_max < s.T_tube
+
+
+def test_no_plate_outer_shield_sits_where_the_plate_was():
+    s = rad.Setup()
+    one = rad.solve(s, 1, n_strips=20, plate=False)
+    assert one.T_sheets.shape == (1, 20)
+    # A lone low-emissivity shield absorbs less than the plate would at the same spot.
+    assert one.T_plate_max < rad.solve(s, 0, n_strips=20).T_plate_max
+    two = rad.solve(s, 2, n_strips=20, plate=False)
+    assert two.T_plate_max < one.T_plate_max
+
+
+def test_no_plate_needs_a_shield():
+    with pytest.raises(ValueError):
+        rad.solve(rad.Setup(), 0, plate=False)
