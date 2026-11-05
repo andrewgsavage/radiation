@@ -138,7 +138,8 @@ def tube_to_rectangle(radius, length, distance, z_lo, z_hi, n_phi=360, n_x=80):
 # --- radiation/conduction network for a source facing a stack of parallel sheets
 
 def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
-                G_lateral=None, G_gap=None, h_exposed=None, T_last=None, tol=1e-8):
+                G_lateral=None, G_gap=None, h_exposed=None, T_last=None, tol=1e-8,
+                convect_front=True):
     """Solve for patch temperatures on a stack of sheets facing hot source surfaces.
 
     The source is one or more surfaces at fixed temperature (e.g. tube segments) that
@@ -154,6 +155,7 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     G_gap:     (n_k,) W/K conductance through the air between facing patches.
     h_exposed: h(T) for faces open to room air (first sheet's front, last sheet's back).
     T_last:    fix the last sheet's temperature instead of solving for it.
+    convect_front: if False, only the last sheet's back face loses heat to room air.
 
     Returns (T, Q_src): T is (n_sheets, n_k) in K, Q_src the sources' total net radiation in W.
     """
@@ -205,7 +207,8 @@ def solve_stack(T_src, A_src, eps_src, F_src, A_strip, sheet_eps, F_gap, T_amb,
     K = G - np.diag(G.sum(axis=1))
 
     exposed = np.zeros(n_u)
-    exposed[:n_k] += A_strip
+    if convect_front:
+        exposed[:n_k] += A_strip
     exposed[-n_k:] += A_strip
     Eb_src = SIGMA * T_src**4
 
@@ -295,17 +298,23 @@ def strip_edges(height, n_strips):
     return height / 2 * np.sign(u) * np.abs(u) ** 1.5
 
 
-def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = True) -> Result:
+def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = True,
+          spacing: float = None, convect_front: bool = True) -> Result:
     """n_strips = 1 gives the lumped model (each sheet at one temperature).
 
     plate=False removes the plate: the outermost shield takes its place, a gap away
     from the tube, and the other shields are evenly spaced inside it.
+
+    spacing: if given, every gap (tube surface to first sheet, and sheet to sheet) is
+    this wide, so the stack grows with the number of shields; setup.gap is ignored.
+    convect_front=False: only the outermost face, furthest from the tube, convects (issue #8).
     """
     if not plate and n_shields < 1:
         raise ValueError("need at least one shield when there is no plate")
     s = setup
     r = s.tube_od / 2
-    spacing = s.gap / (n_shields + 1 if plate else n_shields)
+    if spacing is None:
+        spacing = s.gap / (n_shields + 1 if plate else n_shields)
     A_tube = np.pi * s.tube_od * s.length
 
     edges = strip_edges(s.plate_height, n_strips)
@@ -329,6 +338,7 @@ def solve(setup: Setup, n_shields: int = 0, n_strips: int = 60, plate: bool = Tr
         G_lateral=[chain_conductance(g_shield)] * n_shields + [chain_conductance(g_plate)] * plate,
         G_gap=G_gap,
         h_exposed=lambda T: h_vertical_plate(T, s.T_amb, s.plate_height),
+        convect_front=convect_front,
     )
     return Result(n_shields, edges, T, Q)
 
