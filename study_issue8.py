@@ -3,7 +3,7 @@ Shields needed to keep the outermost sheet below 150 C, and how sheet spacing af
 from radiation import Setup, solve
 
 s = Setup()
-LIMIT = 150 + 273.15
+LIMIT = 80 + 273.15
 kw = dict(convect_front=False, n_strips=40)
 
 print("Fixed 10 mm gap, shields evenly spaced inside it (peak of outermost sheet, C)")
