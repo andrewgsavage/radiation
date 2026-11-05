@@ -159,14 +159,18 @@ class Result3D:
 
 
 def solve3d(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100, 0.300),
-            plate_x0=0.130, n_x=20, n_z=30, n_segments=40) -> Result3D:
+            plate_x0=0.130, n_x=20, n_z=30, n_segments=40, spacing=None,
+            convect_front=True) -> Result3D:
     """Sheets span x in [plate_x0, plate_x0 + setup.length]. The tube spans tube_x, with
-    temperatures from `profile` (see load_tube_profiles); setup.T_tube is not used."""
+    temperatures from `profile` (see load_tube_profiles); setup.T_tube is not used.
+
+    spacing and convect_front work as in radiation.solve (issue #8)."""
     if not plate and n_shields < 1:
         raise ValueError("need at least one shield when there is no plate")
     s = setup
     r = s.tube_od / 2
-    spacing = s.gap / (n_shields + 1 if plate else n_shields)
+    if spacing is None:
+        spacing = s.gap / (n_shields + 1 if plate else n_shields)
 
     x_edges = np.linspace(plate_x0, plate_x0 + s.length, n_x + 1)
     z_edges = rad.strip_edges(s.plate_height, n_z)
@@ -187,6 +191,7 @@ def solve3d(setup: rad.Setup, profile, n_shields=0, plate=True, tube_x=(0.100, 0
         G_lateral=[G_shield] * n_shields + [G_plate] * plate,
         G_gap=rad.k_air(473.15) * A_patch / spacing,
         h_exposed=lambda T: rad.h_vertical_plate(T, s.T_amb, s.plate_height),
+        convect_front=convect_front,
     )
     return Result3D(n_shields, x_edges, z_edges, T.reshape(len(sheet_eps), n_x, n_z), seg_x, seg_T, Q)
 

@@ -83,6 +83,18 @@ is 4 at 4 mm spacing (18 mm, 72 °C), and the shortest stack is 9 at 1 mm spacin
 (13.5 mm, 77 °C). Packing shields closer than 1 mm makes the stack longer, because
 the shields' own thickness then outweighs the gaps.
 
+### Issue #8 in 3D, measured tube temperatures
+
+Same setup (no plate, outer-face convection only, 80 °C limit, under 20 mm including 0.5 mm
+shields), with the `astral_temps.csv` profiles (`python plot_issue8_3d.py`, ~10 min).
+Because the tube is only near its peak over the middle ~50 mm, far fewer shields are needed than in 2D:
+
+| Profile | Fewest shields | Shortest stack |
+|---|---|---|
+| "545" | 2 at 7.5 mm (16 mm, 71 °C); 2 at 5 mm is marginal (79 °C) | 4 at 1 mm (6 mm, 75 °C) |
+| "500" | 2 at 4 mm (9 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
+| "300" | 1 at any spacing (70 °C or less) | 1 at 0.5 mm (1 mm, 70 °C) |
+
 ## Running
 
 ```bash
