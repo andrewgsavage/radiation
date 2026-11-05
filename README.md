@@ -135,6 +135,19 @@ shortest stack at ε = 0.2 despite their own thickness; 0.25 mm shields need one
 Aluminium spreads the hot spot over the whole sheet, so a single shield is enough unless it
 is oxidised or painted (ε = 0.4).
 
+**15 µm aluminium foil** shields, "545" profile (`python plot_issue8_3d_foil.py`, at most 15
+foils per stack):
+
+| Foil ε | Fewest shields | Shortest stack |
+|---|---|---|
+| 0.05 | 1 at 7.5 mm (75 °C); 1 at 5 mm is marginal (79 °C) | 2 at 0.5 mm (1 mm, 72 °C) |
+| 0.1 | 2 at 5 mm (10 mm, 76 °C) | 5 at 0.5 mm (2.6 mm, 73 °C) |
+| 0.2 | 3 at 4 mm (12 mm, 79 °C) | 8 at 0.5 mm (4.1 mm, 78 °C) |
+
+Foil is too thin to spread heat sideways (k·t is below 0.25 mm stainless), so it relies on
+low emissivity, but with almost no thickness, many closely spaced foils make a very
+short stack.
+
 ## Running
 
 ```bash
