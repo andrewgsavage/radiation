@@ -91,7 +91,7 @@ Because the tube is only near its peak over the middle ~50 mm, far fewer shields
 
 | Profile | Fewest shields | Shortest stack |
 |---|---|---|
-| "545" | 2 at 7.5 mm (16 mm, 71 °C); 2 at 5 mm is marginal (79 °C) | 4 at 1 mm (6 mm, 75 °C) |
+| "545" | 2 at 7.5 mm (16 mm, 71 °C); 2 at 5 mm is marginal (79 °C) | 5 at 0.5 mm (5 mm, 77 °C) |
 | "500" | 2 at 4 mm (9 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
 | "300" | 1 at any spacing (70 °C or less) | 1 at 0.5 mm (1 mm, 70 °C) |
 
@@ -104,6 +104,18 @@ With **ε = 0.4 shields** (oxidised stainless), the second row of the plot:
 | "300" | 1 at 10 mm (10.5 mm, 78 °C) | 2 at 0.5 mm (2 mm, 75 °C) |
 
 Every solved point is in `issue8_3d_results.csv`.
+
+**Half-thickness (0.25 mm) shields**, "545" profile only (`python plot_issue8_3d_thickness.py`):
+
+| Shield ε | Thickness | Fewest shields | Shortest stack |
+|---|---|---|---|
+| 0.2 | 0.5 mm | 2 at 5 mm (11 mm, 79 °C) | 5 at 0.5 mm (5 mm, 77 °C) |
+| 0.2 | 0.25 mm | 3 at 4 mm (12.75 mm, 74 °C) | 7 at 0.5 mm (5.25 mm, 78 °C) |
+| 0.4 | 0.5 mm | 3 at 4 mm (13.5 mm, 77 °C) | 8 at 0.5 mm (8 mm, 78 °C) |
+| 0.4 | 0.25 mm | 4 at 3 mm (13 mm, 78 °C) | 10 at 0.5 mm (7.5 mm, 78 °C) |
+
+Thinner shields run hotter: they conduct less heat sideways, so the hot spot opposite the
+tube's peak spreads less. This costs about one extra shield, and saves very little length.
 
 ## Running
 
