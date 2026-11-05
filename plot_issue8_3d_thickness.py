@@ -1,12 +1,12 @@
 """Issue #8 in 3D, hottest ("545") profile only: shield emissivity 0.2 / 0.4 against
-shield thickness 0.5 / 0.25 mm. Uses the cache in plot_issue8_3d."""
+shield thickness 1 / 0.5 / 0.25 mm. Uses the cache in plot_issue8_3d."""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from plot_issue8_3d import EPS, SPACINGS, peak
 
 NAME = "545°C"
-THICK = (0.0005, 0.00025)
+THICK = (0.001, 0.0005, 0.00025)
 fig, axes = plt.subplots(len(EPS), len(THICK), figsize=(7 * len(THICK), 5 * len(EPS)), sharey=True)
 for i, eps in enumerate(EPS):
     for ax, t in zip(axes[i], THICK):

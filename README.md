@@ -105,17 +105,20 @@ With **ε = 0.4 shields** (oxidised stainless), the second row of the plot:
 
 Every solved point is in `issue8_3d_results.csv`.
 
-**Half-thickness (0.25 mm) shields**, "545" profile only (`python plot_issue8_3d_thickness.py`):
+**Shield thickness**, "545" profile only (`python plot_issue8_3d_thickness.py`):
 
 | Shield ε | Thickness | Fewest shields | Shortest stack |
 |---|---|---|---|
+| 0.2 | 1 mm | 2 at 3 mm (8 mm, 75 °C) | 3 at 0.5 mm (4.5 mm, 80 °C, marginal) |
 | 0.2 | 0.5 mm | 2 at 5 mm (11 mm, 79 °C) | 5 at 0.5 mm (5 mm, 77 °C) |
 | 0.2 | 0.25 mm | 3 at 4 mm (12.75 mm, 74 °C) | 7 at 0.5 mm (5.25 mm, 78 °C) |
+| 0.4 | 1 mm | 2 at 7.5 mm (17 mm, 77 °C) | 6 at 0.5 mm (9 mm, 79 °C) |
 | 0.4 | 0.5 mm | 3 at 4 mm (13.5 mm, 77 °C) | 8 at 0.5 mm (8 mm, 78 °C) |
 | 0.4 | 0.25 mm | 4 at 3 mm (13 mm, 78 °C) | 10 at 0.5 mm (7.5 mm, 78 °C) |
 
-Thinner shields run hotter: they conduct less heat sideways, so the hot spot opposite the
-tube's peak spreads less. This costs about one extra shield, and saves very little length.
+Thicker shields run cooler: they conduct more heat sideways, spreading the hot spot
+opposite the tube's peak. 1 mm shields need one fewer shield than 0.5 mm, and give the
+shortest stack at ε = 0.2 despite their own thickness; 0.25 mm shields need one more.
 
 ## Running
 
