@@ -120,6 +120,21 @@ Thicker shields run cooler: they conduct more heat sideways, spreading the hot s
 opposite the tube's peak. 1 mm shields need one fewer shield than 0.5 mm, and give the
 shortest stack at ε = 0.2 despite their own thickness; 0.25 mm shields need one more.
 
+**Aluminium shields** (k = 200 W/m·K against stainless at 16), "545" profile
+(`python plot_issue8_3d_aluminium.py`):
+
+| Shield ε | Thickness | Fewest shields | Shortest stack |
+|---|---|---|---|
+| 0.1 | 0.5 mm | 1 at 0.5 mm (1 mm, 60 °C) | same |
+| 0.1 | 1 mm | 1 at 0.5 mm (1.5 mm, 57 °C) | same |
+| 0.2 | 0.5 mm | 1 at 1 mm (1.5 mm, 80 °C, marginal) | same |
+| 0.2 | 1 mm | 1 at 0.5 mm (1.5 mm, 74 °C) | same |
+| 0.4 | 0.5 mm | 2 at 2 mm (5 mm, 78 °C) | 4 at 0.5 mm (4 mm, 78 °C) |
+| 0.4 | 1 mm | 2 at 2 mm (6 mm, 76 °C) | 3 at 0.5 mm (4.5 mm, 80 °C, marginal) |
+
+Aluminium spreads the hot spot over the whole sheet, so a single shield is enough unless it
+is oxidised or painted (ε = 0.4).
+
 ## Running
 
 ```bash

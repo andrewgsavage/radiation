@@ -21,20 +21,20 @@ cache = {}
 if os.path.exists(CACHE):
     with open(CACHE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            cache[(float(r["eps_shield"]), float(r["shield_thickness_mm"]), r["profile"], float(r["spacing_mm"]), int(r["n_shields"]))] = float(r["peak_C"])
+            cache[(float(r["eps_shield"]), float(r["shield_thickness_mm"]), float(r["k_shield"]), r["profile"], float(r["spacing_mm"]), int(r["n_shields"]))] = float(r["peak_C"])
 
 
-def peak(eps, name, sp, n, thickness=base.shield_thickness):
-    key = (eps, round(thickness * 1e3, 6), name, round(sp * 1e3, 6), n)
+def peak(eps, name, sp, n, thickness=base.shield_thickness, k=base.k_shield):
+    key = (eps, round(thickness * 1e3, 6), float(k), name, round(sp * 1e3, 6), n)
     if key not in cache:
-        s = dataclasses.replace(base, eps_shield=eps, shield_thickness=thickness)
+        s = dataclasses.replace(base, eps_shield=eps, shield_thickness=thickness, k_shield=k)
         r = solve3d(s, profiles[name], n, plate=False, spacing=sp, convect_front=False, **grid)
         cache[key] = r.T_plate_max - 273.15
         new = not os.path.exists(CACHE)
         with open(CACHE, "a", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
             if new:
-                w.writerow(["eps_shield", "shield_thickness_mm", "profile", "spacing_mm", "n_shields", "peak_C"])
+                w.writerow(["eps_shield", "shield_thickness_mm", "k_shield", "profile", "spacing_mm", "n_shields", "peak_C"])
             w.writerow([*key, f"{cache[key]:.2f}"])
     return cache[key]
 
